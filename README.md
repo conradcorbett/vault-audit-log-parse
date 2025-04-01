@@ -66,30 +66,6 @@ This output shows the log entries where an invalid login attempt occurred, inclu
 
 ---
 
-### **Example of User Display Name from Audit Log:**
-To view the display name and other details for successful logins:
-```bash
-cat my-file.txt | jq -r 'select(.type == "response") | {display_name: .auth.display_name, remote_address: .request.remote_address, time: .time}'
-```
-
-#### Example Output:
-```json
-{
-  "display_name": "userpass-tester",
-  "remote_address": "127.0.0.1",
-  "time": "2025-03-31T22:26:52.752195385Z"
-}
-{
-  "display_name": "userpass-tester",
-  "remote_address": "127.0.0.1",
-  "time": "2025-03-31T22:37:19.911696134Z"
-}
-```
-
-This shows the display name of the user along with the time and remote address of the login event.
-
----
-
 ### **Login and Read Secret Requests:**
 
 1. **Login as `tester1`:**
@@ -97,7 +73,7 @@ This shows the display name of the user along with the time and remote address o
 vault login -method=userpass username=tester1 password=changeme
 ```
 
-2. **Read Secrets:**
+2. **Read some Secrets:**
 ```bash
 vault kv get /app1/apikeys
 vault kv get /app1/database-password
@@ -106,12 +82,12 @@ vault kv get /app1/database-password
 ---
 
 ### **Generate Read Requests Against Specific Secret Path:**
-To filter for read operations against a specific secret path (`audittest/data/secret1`):
+To filter for read operations against a specific secret path (`app1/data/apikeys`):
 ```bash
 cat my-file.txt | jq -r 'select(.type == "response" and .request.operation == "read" and .request.path == "audittest/data/secret1") | {display_name: .auth.display_name, remote_address: .request.remote_address, time: .time}'
 ```
 
-This will output details for all successful read requests on the `audittest/data/secret1` path.
+This will output details for all successful read requests on the `app1/data/apikeys` path.
 
 ---
 
@@ -122,17 +98,3 @@ cat my-file.txt | jq -r 'select(.auth.policy_results.allowed == false and .type 
 ```
 
 This filters the log for entries where a user was denied access based on the policy configuration. The output will show the time, remote address, requested path, and the user's display name.
-
----
-
-## Summary of Commands
-
-- **Enable audit log**: `vault audit enable file file_path=/tmp/my-file.txt`
-- **Enable secret engine & create secrets**: 
-  - `vault secrets enable -path=app1 kv-v2`
-  - `vault kv put /app1/apikeys api-key1=value1 api-key2=value2`
-- **Create user with policy**: `vault policy write tester1 - <<EOF`
-- **Generate failed login attempts**: `vault login -method=userpass username=tester password=wrongpassword`
-- **Query audit log**: Use `jq` commands to filter based on various criteria like error messages or specific paths.
-
-This guide should help you query Vault's audit logs effectively to monitor authentication events, errors, and access requests.
