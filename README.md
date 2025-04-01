@@ -66,7 +66,7 @@ This output shows the log entries where an invalid login attempt occurred, inclu
 
 ---
 
-### **Login and Read Secret Requests:**
+### **Login as User and Read Secrets:**
 
 1. **Login as `tester1`:**
 ```bash
@@ -81,7 +81,7 @@ vault kv get /app1/database-password
 
 ---
 
-### **Generate Read Requests Against Specific Secret Path:**
+### **View Read Requests Against Specific Secret Path:**
 To filter for read operations against a specific secret path (`app1/data/apikeys`):
 ```bash
 cat my-file.txt | jq -r 'select(.type == "response" and .request.operation == "read" and .request.path == "app1/data/apikeys") | {display_name: .auth.display_name, remote_address: .request.remote_address, time: .time}'
@@ -92,7 +92,6 @@ This will output details for all successful read requests on the `app1/data/apik
 ---
 
 ### **View Entries Where User Attempted To Access Path They Did Not Have Access:**
-To view entries where a user attempted to access a path they did not have permission for:
 ```bash
 cat my-file.txt | jq -r 'select(.auth.policy_results.allowed == false and .type == "response") | {time: .time, remote_address: .request.remote_address, path: .request.path, display_name: .auth.display_name}'
 ```
