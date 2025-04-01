@@ -39,7 +39,7 @@ vault write auth/userpass/users/tester1     password=changeme     policies=teste
 ### 4. **Generate Failed Logins:**
 Generate some failed login attempts to simulate errors:
 ```bash
-vault login -method=userpass username=tester password=wrongpassword
+vault login -method=userpass username=tester1 password=wrongpassword
 ```
 
 ---
@@ -56,7 +56,7 @@ cat my-file.txt | jq -r 'select(.error == "invalid credentials") | {time: .time,
 ```json
 {
   "time": "2025-03-31T23:28:59.099067555Z",
-  "path": "auth/userpass/login/tester",
+  "path": "auth/userpass/login/tester1",
   "remote_address": "127.0.0.1",
   "error": "invalid credentials"
 }
@@ -84,14 +84,14 @@ vault kv get /app1/database-password
 ### **Generate Read Requests Against Specific Secret Path:**
 To filter for read operations against a specific secret path (`app1/data/apikeys`):
 ```bash
-cat my-file.txt | jq -r 'select(.type == "response" and .request.operation == "read" and .request.path == "audittest/data/secret1") | {display_name: .auth.display_name, remote_address: .request.remote_address, time: .time}'
+cat my-file.txt | jq -r 'select(.type == "response" and .request.operation == "read" and .request.path == "app1/data/apikeys") | {display_name: .auth.display_name, remote_address: .request.remote_address, time: .time}'
 ```
 
 This will output details for all successful read requests on the `app1/data/apikeys` path.
 
 ---
 
-### **View Entries Where User Did Not Have Access:**
+### **View Entries Where User Attempted To Access Path They Did Not Have Access:**
 To view entries where a user attempted to access a path they did not have permission for:
 ```bash
 cat my-file.txt | jq -r 'select(.auth.policy_results.allowed == false and .type == "response") | {time: .time, remote_address: .request.remote_address, path: .request.path, display_name: .auth.display_name}'
