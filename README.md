@@ -32,14 +32,14 @@ EOF
 
 Now enable user authentication and create a user `tester1`:
 ```bash
-vault auth enable userpass
-vault write auth/userpass/users/tester1     password=changeme     policies=tester1
+vault auth enable -path=userpass1 userpass
+vault write auth/userpass1/users/tester1     password=changeme     policies=tester1
 ```
 
 ### 4. **Generate Failed Logins:**
 Generate some failed login attempts to simulate errors:
 ```bash
-vault login -method=userpass username=tester1 password=wrongpassword
+vault login -method=userpass -path=userpass1 username=tester1 password=wrongpassword
 ```
 
 ---
@@ -70,7 +70,7 @@ This output shows the log entries where an invalid login attempt occurred, inclu
 
 1. **Login as `tester1`:**
 ```bash
-vault login -method=userpass username=tester1 password=changeme
+vault login -method=userpass -path=userpass1 username=tester1 password=changeme
 ```
 
 2. **Read some Secrets:**
@@ -98,3 +98,22 @@ cat my-file.txt | jq -r 'select(.auth.policy_results.allowed == false and .type 
 ```
 
 This filters the log for entries where a user was denied access based on the policy configuration. The output will show the time, remote address, requested path, and the user's display name.
+
+## Cleanup
+
+Delete the lab setup
+
+### 1. **Disable Vault's Audit Log:**
+To disable the audit log, run the following command:
+```bash
+vault audit disable file
+rm /tmp/my-file.txt
+```
+
+### 2. **Disable secrets, delete user, and auth mounts:**
+Enable the `kv-v2` secret engine and create a couple of secrets:
+```bash
+vault secrets disable app1
+vault auth disable userpass1
+vault policy delete tester1
+```
